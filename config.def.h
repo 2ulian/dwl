@@ -184,7 +184,7 @@ static const char *screenshot_region[] = {"hyprshot", "-m", "region",
 static const char *screenlock[] = {"hyprlock", NULL};
 
 static const char *change_wallpaper[] = {
-    "~/nixos-config/dotfiles/tofi/wallpaper.sh", NULL};
+    "/home/fellwin/nixos-config/dotfiles/tofi/wallpaper.sh", NULL};
 
 static const Key keys[] = {
     /* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
