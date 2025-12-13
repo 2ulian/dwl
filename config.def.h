@@ -92,7 +92,7 @@ static const struct xkb_rule_names xkb_rules = {
     .options = "ctrl:nocaps",
     */
     .layout = "fr",
-    .options = NULL,
+    .options = "lv3:rwin_switch",
 };
 
 static const int repeat_rate = 25;
@@ -175,8 +175,10 @@ static const char *mutevol[] = {"wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@",
                                 "toggle", NULL};
 static const char *light_up[] = {"brillo", "-q", "-A", "5", NULL};
 static const char *light_down[] = {"brillo", "-q", "-U", "5", NULL};
-static const char *kbd_backlight_up[] = {"brightnessctl", "-d", "kbd_backlight", "set", "+10%", NULL};
-static const char *kbd_backlight_down[] = {"brightnessctl", "-d", "kbd_backlight", "set", "10%-", NULL};
+static const char *kbd_backlight_up[] = {
+    "brightnessctl", "-d", "kbd_backlight", "set", "+10%", NULL};
+static const char *kbd_backlight_down[] = {
+    "brightnessctl", "-d", "kbd_backlight", "set", "10%-", NULL};
 
 static const Key keys[] = {
     /* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
