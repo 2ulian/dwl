@@ -23,7 +23,7 @@ static const float rootcolor[] = COLOR(0x000000ff);
 static const float fullscreen_bg[] = {0.0f, 0.0f, 0.0f,
                                       1.0f}; /* You can also use glsl colors */
 static const char *cursor_theme =
-    macOS; /* set to NULL to use default cursor theme */
+    "macOS"; /* set to NULL to use default cursor theme */
 static const char cursor_size[] =
     "64"; /* Make sure it's a valid integer, otherwise things will break */
 static int enableautoswallow =
