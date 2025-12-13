@@ -25,7 +25,7 @@ static const float fullscreen_bg[] = {0.0f, 0.0f, 0.0f,
 static const char *cursor_theme =
     "macOS"; /* set to NULL to use default cursor theme */
 static const char cursor_size[] =
-    "64"; /* Make sure it's a valid integer, otherwise things will break */
+    "24"; /* Make sure it's a valid integer, otherwise things will break */
 static int enableautoswallow =
     1; /* enables autoswallowing newly spawned clients */
 static float swallowborder = 1.0f; /* add this multiplied by borderpx to border
