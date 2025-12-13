@@ -12,14 +12,16 @@ static const unsigned int systrayspacing = 2; /* systray spacing */
 static const int showsystray = 1;             /* 0 means no systray */
 static const int showbar = 1;                 /* 0 means no bar */
 static const int topbar = 1;                  /* 0 means bottom bar */
-static const char *fonts[] = {"monospace:size=10"};
+static const char *fonts[] = {"terminus:size=10"};
 static const float rootcolor[] = COLOR(0x000000ff);
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old
  * behavior */
 static const float fullscreen_bg[] = {0.0f, 0.0f, 0.0f,
                                       1.0f}; /* You can also use glsl colors */
-static int enableautoswallow = 1; /* enables autoswallowing newly spawned clients */
-static float swallowborder = 1.0f; /* add this multiplied by borderpx to border when a client is swallowed */
+static int enableautoswallow =
+    1; /* enables autoswallowing newly spawned clients */
+static float swallowborder = 1.0f; /* add this multiplied by borderpx to border
+                                      when a client is swallowed */
 static uint32_t colors[][3] = {
     /*               fg          bg          border    */
     [SchemeNorm] = {0xbbbbbbff, 0x222222ff, 0x444444ff},
@@ -36,7 +38,8 @@ static int log_level = WLR_ERROR;
 /* NOTE: ALWAYS keep a rule declared even if you don't use rules (e.g leave at
  * least one example) */
 static const Rule rules[] = {
-    /* app_id             title       tags mask     isfloating   isterm   noswallow   monitor */
+    /* app_id             title       tags mask     isfloating   isterm
+       noswallow   monitor */
     /* examples: */
     {"kitty", NULL, 0, 0, 1, 1, -1},
     {"Gimp_EXAMPLE", NULL, 0, 1, 0, 0,
@@ -67,7 +70,7 @@ static const MonitorRule monrules[] = {
     */
     /* defaults */
     //{NULL, 0.55f, 1, 1, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
-    {NULL, 0.5f, 1, 1.5, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
+    {NULL, 0.5f, 1, 1.6, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
 };
 
 /* keyboard */
