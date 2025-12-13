@@ -179,6 +179,9 @@ static const char *kbd_backlight_up[] = {
     "brightnessctl", "-d", "kbd_backlight", "set", "+10%", NULL};
 static const char *kbd_backlight_down[] = {
     "brightnessctl", "-d", "kbd_backlight", "set", "10%-", NULL};
+static const char *screenshot_region[] = {
+    "hyprshot", "-m", "region", "--clipboard-only", NULL};
+static const char *screenlock[] = {"hyprlock", NULL};
 
 static const Key keys[] = {
     /* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
@@ -217,6 +220,8 @@ static const Key keys[] = {
      XKB_KEY_greater,
      tagmon,
      {.i = WLR_DIRECTION_RIGHT}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_S, spawn, {.v = screenshot_region}},
+    {MODKEY, XKB_KEY_x, spawn, {.v = screenlock}},
     {0, XKB_KEY_XF86AudioLowerVolume, spawn, {.v = downvol}},
     {0, XKB_KEY_XF86AudioMute, spawn, {.v = mutevol}},
     {0, XKB_KEY_XF86AudioRaiseVolume, spawn, {.v = upvol}},
