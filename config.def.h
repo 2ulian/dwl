@@ -10,7 +10,7 @@ static const int bypass_surface_visibility =
 static const int smartgaps =
     0;               /* 1 means no outer gap when there is only one window */
 static int gaps = 1; /* 1 means gaps between windows are added */
-static const unsigned int gappx = 10;         /* gap pixel between windows */
+static const unsigned int gappx = 5;         /* gap pixel between windows */
 static const unsigned int borderpx = 1;       /* border pixel of windows */
 static const unsigned int systrayspacing = 2; /* systray spacing */
 static const int showsystray = 1;             /* 0 means no systray */
