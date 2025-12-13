@@ -166,7 +166,7 @@ static const enum libinput_config_tap_button_map button_map =
 /* commands */
 static const char *termcmd[] = {"kitty", NULL};
 static const char *menucmd[] = {"tofi-drun", "--drun-launch=true", NULL};
-static const char *dmenucmd[] = {"tofi-run", NULL};
+static const char *dmenucmd[] = {"wmenu", NULL};
 static const char *upvol[] = {"wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@",
                               "5%+", NULL};
 static const char *downvol[] = {"wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@",
