@@ -53,7 +53,7 @@ static const Rule rules[] = {
     /* app_id             title       tags mask     isfloating   isterm
        noswallow   monitor */
     /* examples: */
-    {"kitty", NULL, 0, 0, 1, 1, -1},
+    {"foot", NULL, 0, 0, 1, 1, -1},
     {"Gimp_EXAMPLE", NULL, 0, 1, 0, 0,
      -1}, /* Start on currently visible tags floating, not tiled */
     {"firefox_EXAMPLE", NULL, 1 << 8, 0, 0, 0, -1}, /* Start on ONLY tag "9" */
@@ -164,7 +164,7 @@ static const enum libinput_config_tap_button_map button_map =
   }
 
 /* commands */
-static const char *termcmd[] = {"kitty", NULL};
+static const char *termcmd[] = {"foot", NULL};
 static const char *menucmd[] = {"tofi-drun", "--drun-launch=true", NULL};
 static const char *dmenucmd[] = {"wmenu", NULL};
 static const char *upvol[] = {"wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@",
