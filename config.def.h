@@ -167,6 +167,16 @@ static const enum libinput_config_tap_button_map button_map =
 static const char *termcmd[] = {"kitty", NULL};
 static const char *menucmd[] = {"tofi-drun", "--drun-launch=true", NULL};
 static const char *dmenucmd[] = {"tofi-run", NULL};
+static const char *upvol[] = {"wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@",
+                              "5%+", NULL};
+static const char *downvol[] = {"wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@",
+                                "5%-", NULL};
+static const char *mutevol[] = {"wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@",
+                                "toggle", NULL};
+static const char *light_up[] = {"brillo", "-q", "-A", "5", NULL};
+static const char *light_down[] = {"brillo", "-q", "-U", "5", NULL};
+static const char *kbd_backlight_up[] = {"brightnessctl", "-d", "kbd_backlight", "set", "+10%", NULL};
+static const char *kbd_backlight_down[] = {"brightnessctl", "-d", "kbd_backlight", "set", "10%-", NULL};
 
 static const Key keys[] = {
     /* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
@@ -205,6 +215,13 @@ static const Key keys[] = {
      XKB_KEY_greater,
      tagmon,
      {.i = WLR_DIRECTION_RIGHT}},
+    {0, XKB_KEY_XF86AudioLowerVolume, spawn, {.v = downvol}},
+    {0, XKB_KEY_XF86AudioMute, spawn, {.v = mutevol}},
+    {0, XKB_KEY_XF86AudioRaiseVolume, spawn, {.v = upvol}},
+    {0, XKB_KEY_XF86MonBrightnessUp, spawn, {.v = light_up}},
+    {0, XKB_KEY_XF86MonBrightnessDown, spawn, {.v = light_down}},
+    {0, XKB_KEY_F1, spawn, {.v = kbd_backlight_down}},
+    {0, XKB_KEY_F2, spawn, {.v = kbd_backlight_up}},
     TAGKEYS(XKB_KEY_ampersand, XKB_KEY_1, 0),
     TAGKEYS(XKB_KEY_eacute, XKB_KEY_2, 1),
     TAGKEYS(XKB_KEY_quotedbl, XKB_KEY_3, 2),
