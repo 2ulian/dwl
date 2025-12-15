@@ -149,6 +149,7 @@ struct Client {
 	struct wl_listener set_hints;
 #endif
 	unsigned int bw;
+  char *appicon;
 	uint32_t tags;
 	int isfloating, isurgent, isfullscreen;
 	int isterm, noswallow;
@@ -233,6 +234,7 @@ struct Monitor {
 	unsigned int seltags;
 	unsigned int sellt;
 	uint32_t tagset[2];
+  char **tag_icons;
 	float mfact;
 	int gamma_lut_changed;
 	int nmaster;
@@ -271,6 +273,7 @@ typedef struct {
 	int isterm;
 	int noswallow;
 	int monitor;
+  const char *appicon;
 } Rule;
 
 typedef struct {
@@ -332,6 +335,9 @@ static void destroypointerconstraint(struct wl_listener *listener, void *data);
 static void destroysessionlock(struct wl_listener *listener, void *data);
 static void destroykeyboardgroup(struct wl_listener *listener, void *data);
 static Monitor *dirtomon(enum wlr_direction dir);
+static void remove_outer_separators(char **str);
+static void appiconsappend(char **str, const char *appicon, size_t new_size);
+static void applyappicon(char *tag_icons[], unsigned int *icons_per_tag, const Client *c);
 static void drawbar(Monitor *m);
 static void drawbars(void);
 static void focusclient(Client *c, int lift);
@@ -561,6 +567,11 @@ applyrules(Client *c)
 	const Rule *r;
 	Monitor *mon = selmon, *m;
 
+  outer_separator_beg = outer_separator_beg ? outer_separator_beg : ' ';
+  outer_separator_end = outer_separator_end ? outer_separator_end : ' ';
+  inner_separator = inner_separator ? inner_separator : ' ';
+  truncate_icons_after = truncate_icons_after > 0 ? truncate_icons_after : 1;
+
 	appid = client_get_appid(c);
 	title = client_get_title(c);
 
@@ -569,6 +580,8 @@ applyrules(Client *c)
 	for (r = rules; r < END(rules); r++) {
 		if ((!r->title || strstr(title, r->title))
 				&& (!r->id || strstr(appid, r->id))) {
+      /* r->appicon is static, so lifetime is sufficient */
+      c->appicon = (char*) r->appicon;
 			c->isfloating = r->isfloating;
 			newtags |= r->tags;
 			c->isterm = r->isterm;
@@ -828,7 +841,7 @@ buttonpress(struct wl_listener *listener, void *data)
 			traywidth = tray_get_width(selmon->tray);
 
 			do
-				x += TEXTW(selmon, tags[i]);
+				x += TEXTW(selmon, selmon->tag_icons[i]);
 			while (cx >= x && ++i < LENGTH(tags));
 			if (i < LENGTH(tags)) {
 				click = ClkTagBar;
@@ -981,6 +994,16 @@ cleanupmon(struct wl_listener *listener, void *data)
 	m->wlr_output->data = NULL;
 	wlr_output_layout_remove(output_layout, m->wlr_output);
 	wlr_scene_output_destroy(m->scene_output);
+
+  for (long unsigned int tag_idx = 0; tag_idx < LENGTH(tags); tag_idx++) {
+      if (m->tag_icons[tag_idx]) free(m->tag_icons[tag_idx]);
+      m->tag_icons[tag_idx] = NULL;
+  }
+
+  if (m->tag_icons) {
+    free(m->tag_icons);
+    m->tag_icons = NULL;
+  }
 
 	closemon(m);
 	wlr_scene_node_destroy(&m->fullscreen_bg->node);
@@ -1307,6 +1330,13 @@ createmon(struct wl_listener *listener, void *data)
 			m->lt[0] = r->lt;
 			m->lt[1] = &layouts[LENGTH(layouts) > 1 && r->lt != &layouts[1]];
 			strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof(m->ltsymbol));
+
+      m->tag_icons = (char**) malloc(LENGTH(tags) * sizeof(char*));
+      if (m->tag_icons == NULL) perror("dwm: malloc()");
+      for (long unsigned int tag_idx = 0; tag_idx < LENGTH(tags); tag_idx++) {
+        m->tag_icons[tag_idx] = NULL;
+      }
+
 			wlr_output_state_set_scale(&state, r->scale);
 			wlr_output_state_set_transform(&state, r->rr);
 
@@ -1664,6 +1694,98 @@ dirtomon(enum wlr_direction dir)
 }
 
 void
+remove_outer_separators(char **str)
+{
+    const char *clean_tag_name_beg = *str + 1;
+    const size_t clean_tag_name_len = strlen(*str) - 2;
+
+    char *temp_tag_name = (char*)
+        malloc(clean_tag_name_len + 1);
+
+    if (temp_tag_name == NULL) perror("dwm: malloc()");
+
+    memset(temp_tag_name, 0, clean_tag_name_len + 1);
+
+    strncpy(temp_tag_name,
+            clean_tag_name_beg,
+            clean_tag_name_len);
+
+    if (*str) free(*str);
+    *str = temp_tag_name;
+}
+
+void
+appiconsappend(char **str, const char *appicon, size_t new_size)
+{
+    char *temp_tag_name = (char*) malloc(new_size);
+    if (temp_tag_name == NULL) perror("dwm: malloc()");
+
+    /* NOTE: Example format of temp_tag_name (with two appicons):
+     *  <outer_sep_beg><appicon><inner_sep><appicon><outer_sep_end>
+     */
+    temp_tag_name = memset(temp_tag_name, 0, new_size);
+
+    temp_tag_name[0] = outer_separator_beg;
+    temp_tag_name[new_size - 2] = outer_separator_end;
+
+    strncpy(temp_tag_name + 1, *str, strlen(*str));
+    temp_tag_name[strlen(temp_tag_name)] = inner_separator;
+
+    strncpy(temp_tag_name + strlen(temp_tag_name),
+            appicon, strlen(appicon));
+
+    if (*str) free(*str);
+    *str = temp_tag_name;
+}
+
+void
+applyappicon(char *tag_icons[], unsigned int *icons_per_tag, const Client *c)
+{
+  const size_t outer_separators_size = 2;
+  const size_t inner_separator_size = 1;
+  size_t new_size = 0;
+
+    for (unsigned t = 1, i = 0;
+            i < LENGTH(tags);
+            t <<= 1, i++)
+    {
+        if (c->tags & t) {
+          if (icons_per_tag[i] == 0) {
+                if (tag_icons[i]) free(tag_icons[i]);
+                tag_icons[i] = strndup(c->appicon, strlen(c->appicon));
+          } else {
+                char *icon = NULL;
+                if (icons_per_tag[i] < truncate_icons_after)
+                    icon = c->appicon;
+                else if (icons_per_tag[i] == truncate_icons_after)
+                    icon =  truncate_symbol;
+                else {
+                    icons_per_tag[i]++;
+                    continue;
+                }
+
+                /* remove outer separators from previous iterations
+                 * otherwise they get applied recursively */
+                if (icons_per_tag[i] > 1) {
+                    remove_outer_separators(&tag_icons[i]);
+                }
+
+                new_size = strlen(tag_icons[i])
+                    + outer_separators_size
+                    + inner_separator_size
+                    + strlen(icon)
+                    + 1;
+
+                appiconsappend(&tag_icons[i], icon, new_size);
+            }
+
+            icons_per_tag[i]++;
+        }
+    }
+}
+
+
+void
 drawbar(Monitor *m)
 {
 	int traywidth = 0;
@@ -1673,6 +1795,7 @@ drawbar(Monitor *m)
 	uint32_t i, occ = 0, urg = 0;
 	Client *c;
 	Buffer *buf;
+  unsigned int icons_per_tag[LENGTH(tags)];
 
 	if (!m->scene_buffer->node.enabled)
 		return;
@@ -1688,9 +1811,21 @@ drawbar(Monitor *m)
 		drwl_text(m->drw, m->b.width - (tw + traywidth), 0, tw, m->b.height, 0, stext, 0);
 	}
 
+  memset(icons_per_tag, 0, LENGTH(tags) * sizeof(int));
+
+  for (long unsigned int tag_idx = 0; tag_idx < LENGTH(tags); tag_idx++) {
+    /* set each tag to default value */
+    m->tag_icons[tag_idx] = strndup(tags[tag_idx], strlen(tags[tag_idx]));
+  }
+
 	wl_list_for_each(c, &clients, link) {
 		if (c->mon != m)
 			continue;
+
+    if (c->appicon && strlen(c->appicon) > 0) {
+      applyappicon(m->tag_icons, icons_per_tag, c);
+    }
+
 		occ |= c->tags;
 		if (c->isurgent)
 			urg |= c->tags;
@@ -1698,10 +1833,10 @@ drawbar(Monitor *m)
 	x = 0;
 	c = focustop(m);
 	for (i = 0; i < LENGTH(tags); i++) {
-		w = TEXTW(m, tags[i]);
+		w = TEXTW(m, m->tag_icons[i]);
 		drwl_setscheme(m->drw, colors[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
-		drwl_text(m->drw, x, 0, w, m->b.height, m->lrpad / 2, tags[i], urg & 1 << i);
-		if (occ & 1 << i)
+		drwl_text(m->drw, x, 0, w, m->b.height, m->lrpad / 2, m->tag_icons[i], urg & 1 << i);
+		if (occ & 1 << i && icons_per_tag[i] ==0)
 			drwl_rect(m->drw, x + boxs, boxs, boxw, boxw,
 				m == selmon && c && c->tags & 1 << i,
 				urg & 1 << i);
